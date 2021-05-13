@@ -72,9 +72,24 @@ def get_pitch(x,y,z):
     radians = math.atan2((-z) , dist(x,y))
     return math.degrees(radians)
 
-def get_motion():
+def get_roll_motion():
     """Function calculate movement in roll"""
     pass
+
+def get_pitch_motion():
+    """Function calculate movement in roll"""
+    pass
+
+def get_roll_pitch_motion():
+    """Function calculate movement in roll"""
+    pass
+
+def get_motion():
+    """Function calculate movement"""
+    # here will be if statement
+    pass
+
+
 
 def init_opengl():
     glEnable(GL_DEPTH_TEST)
