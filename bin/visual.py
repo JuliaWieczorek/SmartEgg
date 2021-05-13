@@ -499,6 +499,45 @@ def handle_arrow_keys(event):
     x_angle = values[2]
     y_angle = values[3]
 
+
+def settings():
+    root = tk.Tk()
+    root.title('Settings')
+    root.geometry("400x100")
+    root.resizable(0, 0)  # Don't allow resizing in the x or y direction
+
+    v = StringVar(root, "1")
+    values = {"5": 5, "10": 10, "15": 15, "20": 20, "50": 50}
+
+    roll_entry = Label(root, text="ROLL")
+    roll_entry.grid(column=0, row=0)
+    col = 0
+    for (name, value) in values.items():
+        radio = Radiobutton(root, text=name, variable=v, value=value)
+        radio.grid(column=1+col, row=0, sticky=tk.W)
+        col += 1
+
+    pitch_entry = Label(root, text="PITCH")
+    pitch_entry.grid(column=0, row=2)
+    col = 0
+    for (name, value) in values.items():
+        radio = Radiobutton(root, text=name, variable=v, value=value)
+        radio.grid(column=1+col, row=2, sticky=tk.W)
+        col += 1
+
+    rollpitch_entry = Label(root, text="ROLL AND PITCH")
+    rollpitch_entry.grid(column=0, row=4)
+    col = 0
+    for (name, value) in values.items():
+        radio = Radiobutton(root, text=name, variable=v, value=value)
+        radio.grid(column=1+col, row=4, sticky=tk.W)
+        col += 1
+
+    submit_btn = Button(root, text="Submit", width=5)
+    submit_btn.grid(row=2, column=7)
+
+    mainloop()
+
 def run():
     global root
     
@@ -518,6 +557,10 @@ def run():
     filemenu.add_separator()
     filemenu.add_command(label="Exit", command=exitapp)
     menubar.add_cascade(label="File", menu=filemenu)
+
+    settingsmenu = Menu(menubar, tearoff=0)
+    settingsmenu.add_command(label="Settings", command=settings)
+    menubar.add_cascade(label="Settings", menu=settingsmenu)
     root.config(menu=menubar)
 
     #Enter mainlopp
