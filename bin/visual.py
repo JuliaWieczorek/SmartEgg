@@ -72,6 +72,10 @@ def get_pitch(x,y,z):
     radians = math.atan2((-z) , dist(x,y))
     return math.degrees(radians)
 
+def get_motion():
+    """Function calculate movement in roll"""
+    pass
+
 def init_opengl():
     glEnable(GL_DEPTH_TEST)
     glDepthFunc(GL_LESS)
@@ -118,7 +122,7 @@ def load_data(filename):
     return data
 
 
-# TODO: add settings, statistics move/hour and column with movement
+# TODO: statistics move/hour and column with movement
 
 def get_record(index):  
     record = table.model.getRecordAtRow(index)
@@ -499,8 +503,8 @@ def handle_arrow_keys(event):
     x_angle = values[2]
     y_angle = values[3]
 
-
 def settings():
+    """Create Settings window"""
     root = tk.Tk()
     root.title('Settings')
     root.geometry("400x100")
