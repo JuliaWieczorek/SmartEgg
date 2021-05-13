@@ -117,6 +117,9 @@ def load_data(filename):
             i += 1
     return data
 
+
+# TODO: add settings, statistics move/hour and column with movement
+
 def get_record(index):  
     record = table.model.getRecordAtRow(index)
 
