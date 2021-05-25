@@ -72,8 +72,9 @@ def get_pitch(x,y,z):
     radians = math.atan2((-z) , dist(x,y))
     return math.degrees(radians)
 
-def get_roll_motion():
+def get_roll_motion(data):
     """Function calculate movement in roll"""
+    print(data)
     pass
 
 def get_pitch_motion():
@@ -121,8 +122,8 @@ def load_data(filename):
     global day, month, year
 
     data = {}
-     
-    with open(filename, 'rb') as csvfile:
+
+    with open(filename) as csvfile: # it was 'open(filenam, 'rb')'
         reader = csv.reader(csvfile, delimiter=',')
         i = 0
         for row in reader:
@@ -134,6 +135,7 @@ def load_data(filename):
             # add tuple to a dictionary
             data.update( { i : dict(zip(['time', 'x', 'y', 'z', 'roll', 'pitch'], [time, x, y, z, round(get_roll(x,y,z),2),round(get_pitch(x,y,z),2)]))} )
             i += 1
+        print(data[1]['roll'])
     return data
 
 
@@ -148,7 +150,7 @@ def get_record(index):
     accel_zout_scaled = float(record.get('z'))
 
     result = str(time)+" "+str(get_roll(accel_xout_scaled,accel_yout_scaled,accel_zout_scaled))+" "+str(get_pitch(accel_xout_scaled,accel_yout_scaled,accel_zout_scaled))
-    print(result)
+    # print(result)
     return result.split(" ")
 
 def drawText(x, y, text):                                                
@@ -320,22 +322,18 @@ def connect():
         pygame.display.flip()
         #root.update() 
 
-
-
-
-
-
 def openfile():
+    # TODO: problem with data loading
     global table, time, x_angle, y_angle, day, month, year, root, embedFrame, recordsFrame, play
 
-    name = filedialog.askopenfilename(initialdir = ".",title = "Select file", filetypes =(("Text File", "*.txt"),("All Files","*.*")))
+    name = filedialog.askopenfilename(initialdir=".", title="Select file", filetypes=(("Text File", "*.txt"), ("All Files","*.*")))
     
     if name == "":
         # if file openning was cancelled then return
         return
     else:
         try:
-            path = name.split('/')
+            path = name.split("/")
             # get date from file name
             filename = path[len(path)-1]
             day = filename[6:8]
@@ -346,10 +344,11 @@ def openfile():
             model = TableModel()
             # load data
             data = load_data(name)
+            # print(data) # here it works as a nested dict
             # import data ti tablemodel
             model.importDict(data)
         except:
-            tk.messagebox.showerror("Error","File reading failed!")
+            tk.messagebox.showerror("Error", "File reading failed!")
             return
 
     # If another file is open already then close it
