@@ -145,8 +145,11 @@ def load_data(filename):
             y       = float(row[2])
             z       = float(row[3])
             # add tuple to a dictionary
+            motion = get_roll_motion_all(data)
             data.update( { i : dict(zip(['time', 'x', 'y', 'z', 'roll', 'pitch', 'motion'], [time, x, y, z, round(get_roll(x,y,z),2),round(get_pitch(x,y,z),2), 0]))} )
-            # print(binary_roll_motion(get_roll_motion_all(data[i])))
+            # print(len(binary_roll_motion(motion[i])))
+            # print(len(data))
+            # TODO: probably binary_roll_motion is one less than should be
             i += 1
             # binary_roll_motion(get_roll_motion_all(data[row[0]])
         # motion = get_roll_motion_all(data) # lista wszystkiego
