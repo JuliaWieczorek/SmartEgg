@@ -72,10 +72,22 @@ def get_pitch(x,y,z):
     radians = math.atan2((-z) , dist(x,y))
     return math.degrees(radians)
 
-def get_roll_motion(data):
+def get_roll_motion_all(data):
     """Function calculate movement in roll"""
-    print(data)
-    pass
+    motions = []
+    for i in range(len(data)-1):
+        motion = (data[i]['roll'] - data[i+1]['roll'])
+        motions.append(motion)
+    return motions
+
+def binary_roll_motion(motion):
+    motions = []
+    for i in motion:
+        if i > 5:
+            motions.append(1)
+        else:
+            motions.append(0)
+    return motions
 
 def get_pitch_motion():
     """Function calculate movement in roll"""
@@ -133,9 +145,15 @@ def load_data(filename):
             y       = float(row[2])
             z       = float(row[3])
             # add tuple to a dictionary
-            data.update( { i : dict(zip(['time', 'x', 'y', 'z', 'roll', 'pitch'], [time, x, y, z, round(get_roll(x,y,z),2),round(get_pitch(x,y,z),2)]))} )
+            data.update( { i : dict(zip(['time', 'x', 'y', 'z', 'roll', 'pitch', 'motion'], [time, x, y, z, round(get_roll(x,y,z),2),round(get_pitch(x,y,z),2), 0]))} )
+            # print(binary_roll_motion(get_roll_motion_all(data[i])))
             i += 1
-        print(data[1]['roll'])
+            # binary_roll_motion(get_roll_motion_all(data[row[0]])
+        # motion = get_roll_motion_all(data) # lista wszystkiego
+        # print(motion)
+        # print(binary_roll_motion(motion)) # bierze z listy i zmienia na binary
+        # print(type(data))
+        # print(data[1]['roll']) # roll from second row
     return data
 
 
