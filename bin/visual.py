@@ -72,21 +72,18 @@ def get_pitch(x,y,z):
     radians = math.atan2((-z) , dist(x,y))
     return math.degrees(radians)
 
-def get_roll_motion_all(data):
+def get_roll_motion(i, roll, pivot_roll):
     """Function calculate movement in roll"""
-    motions = []
-    for i in range(len(data)-1):
-        motion = (data[i]['roll'] - data[i+1]['roll'])
-        motions.append(motion)
-    motions.append(0)   # the last one, because length of motions will be always on one less than data
-    return motions
-
-def binary_roll_motion(motion):
-    if motion > 5:
-        i = 1
+    if i == 0:
+        binary_roll = 0
     else:
-        i = 0
-    return i
+        roll_move = roll - pivot_roll
+        if roll_move > 5:
+            binary_roll = 1
+        else:
+            binary_roll = 0
+    return binary_roll
+
 
 def get_pitch_motion():
     """Function calculate movement in roll"""
@@ -136,6 +133,8 @@ def load_data(filename):
 
     with open(filename) as csvfile: # it was 'open(filenam, 'rb')'
         reader = csv.reader(csvfile, delimiter=',')
+        # get_roll_motion
+        pivot_roll = 0
         i = 0
         for row in reader:
             # get values from file
@@ -143,13 +142,15 @@ def load_data(filename):
             x       = float(row[1])
             y       = float(row[2])
             z       = float(row[3])
+            roll = get_roll(x,y,z)
+            pitch = get_pitch(x,y,z)
+            binary_roll = get_roll_motion(i, roll, pivot_roll)
+            pivot_roll = roll
             # add tuple to a dictionary
-            data.update({i: dict(zip(['time', 'x', 'y', 'z', 'roll', 'pitch', 'motion'], [time, x, y, z, round(get_roll(x, y, z), 2), round(get_pitch(x, y, z), 2), 0]))})
+            data.update({i: dict(zip(['time', 'x', 'y', 'z', 'roll', 'pitch', 'motion'], [time, x, y, z, round(roll, 2), round(pitch, 2), binary_roll]))})
             i += 1
-        motion = get_roll_motion_all(data) # lista wszystkiego
+        # motion = get_roll_motion_all(data) # lista wszystkiego
         # print(binary_roll_motion(motion[1])) # bierze z listy i zmienia na binary
-        for row in reader:
-            data.redraw({row: dict(zip(['motion'], [binary_roll_motion(motion[row])]))})
     return data
 
 
