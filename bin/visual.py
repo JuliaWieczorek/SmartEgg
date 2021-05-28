@@ -84,13 +84,20 @@ def get_roll_motion(i, roll, pivot_roll):
             binary_roll = 0
     return binary_roll
 
-
-def get_pitch_motion():
-    """Function calculate movement in roll"""
-    pass
+def get_pitch_motion(i, pitch, pivot_pitch):
+    """Function calculate movement in pitch"""
+    if i == 0:
+        binary_roll = 0
+    else:
+        roll_move = pitch - pivot_pitch
+        if roll_move > 5:
+            binary_roll = 1
+        else:
+            binary_roll = 0
+    return binary_roll
 
 def get_roll_pitch_motion():
-    """Function calculate movement in roll"""
+    """Function calculate movement in vector of roll and pitch"""
     pass
 
 def get_motion():
@@ -135,6 +142,7 @@ def load_data(filename):
         reader = csv.reader(csvfile, delimiter=',')
         # get_roll_motion
         pivot_roll = 0
+        pivot_pitch = 0
         i = 0
         for row in reader:
             # get values from file
@@ -144,10 +152,14 @@ def load_data(filename):
             z       = float(row[3])
             roll = get_roll(x,y,z)
             pitch = get_pitch(x,y,z)
+
             binary_roll = get_roll_motion(i, roll, pivot_roll)
             pivot_roll = roll
+
+            binary_pitch = get_pitch_motion(i, pitch, pivot_pitch)
+            pivot_pitch = pitch
             # add tuple to a dictionary
-            data.update({i: dict(zip(['time', 'x', 'y', 'z', 'roll', 'pitch', 'motion'], [time, x, y, z, round(roll, 2), round(pitch, 2), binary_roll]))})
+            data.update({i: dict(zip(['time', 'x', 'y', 'z', 'roll', 'pitch', 'roll motion', 'pitch motion'], [time, x, y, z, round(roll, 2), round(pitch, 2), binary_roll, binary_pitch]))})
             i += 1
         # motion = get_roll_motion_all(data) # lista wszystkiego
         # print(binary_roll_motion(motion[1])) # bierze z listy i zmienia na binary
