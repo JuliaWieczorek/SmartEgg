@@ -160,9 +160,10 @@ def load_data(filename, *value):
             binary_pitch = get_pitch_motion(i, pitch, pivot_pitch, value[0][1])
             pivot_pitch = pitch
 
-            # TODO: change this TUPLE! I can't update tuple!!!
+            # TODO: zip() create tuple. I can't update tuple!!!
             # add tuple to a dictionary
             data.update({i: dict(zip(['time', 'x', 'y', 'z', 'roll', 'pitch', 'roll motion', 'pitch motion'], [time, x, y, z, round(roll, 2), round(pitch, 2), binary_roll, binary_pitch]))})
+            # table.redraw()
             i += 1
     return data
 
@@ -373,6 +374,7 @@ def openfile():
             data = load_data(name, (5, 5, 5))
             # import data ti tablemodel
             model.importDict(data)
+
         except:
             tk.messagebox.showerror("Error", "File reading failed!")
             return
