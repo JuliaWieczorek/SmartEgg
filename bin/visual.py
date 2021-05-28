@@ -72,25 +72,25 @@ def get_pitch(x,y,z):
     radians = math.atan2((-z) , dist(x,y))
     return math.degrees(radians)
 
-def get_roll_motion(i, roll, pivot_roll):
+def get_roll_motion(i, roll, pivot_roll, value):
     """Function calculate movement in roll"""
     if i == 0:
         binary_roll = 0
     else:
         roll_move = roll - pivot_roll
-        if roll_move > 5:
+        if roll_move > value:
             binary_roll = 1
         else:
             binary_roll = 0
     return binary_roll
 
-def get_pitch_motion(i, pitch, pivot_pitch):
+def get_pitch_motion(i, pitch, pivot_pitch, value):
     """Function calculate movement in pitch"""
     if i == 0:
         binary_roll = 0
     else:
         roll_move = pitch - pivot_pitch
-        if roll_move > 5:
+        if roll_move > value:
             binary_roll = 1
         else:
             binary_roll = 0
@@ -133,14 +133,13 @@ def init_opengl():
     glEnable(GL_DEPTH_TEST)
     glEnable(GL_NORMALIZE)
 
-def load_data(filename):
+def load_data(filename, *value):
     global day, month, year
 
     data = {}
 
-    with open(filename) as csvfile: # it was 'open(filenam, 'rb')'
+    with open(filename) as csvfile: # it was 'open(filename, 'rb')'
         reader = csv.reader(csvfile, delimiter=',')
-        # get_roll_motion
         pivot_roll = 0
         pivot_pitch = 0
         i = 0
@@ -150,19 +149,20 @@ def load_data(filename):
             x       = float(row[1])
             y       = float(row[2])
             z       = float(row[3])
-            roll = get_roll(x,y,z)
-            pitch = get_pitch(x,y,z)
 
-            binary_roll = get_roll_motion(i, roll, pivot_roll)
+            # create new values
+            roll = get_roll(x, y, z)
+            pitch = get_pitch(x, y, z)
+
+            binary_roll = get_roll_motion(i, roll, pivot_roll, value[0][0])
             pivot_roll = roll
 
-            binary_pitch = get_pitch_motion(i, pitch, pivot_pitch)
+            binary_pitch = get_pitch_motion(i, pitch, pivot_pitch, value[0][1])
             pivot_pitch = pitch
+
             # add tuple to a dictionary
             data.update({i: dict(zip(['time', 'x', 'y', 'z', 'roll', 'pitch', 'roll motion', 'pitch motion'], [time, x, y, z, round(roll, 2), round(pitch, 2), binary_roll, binary_pitch]))})
             i += 1
-        # motion = get_roll_motion_all(data) # lista wszystkiego
-        # print(binary_roll_motion(motion[1])) # bierze z listy i zmienia na binary
     return data
 
 
@@ -177,7 +177,6 @@ def get_record(index):
     accel_zout_scaled = float(record.get('z'))
 
     result = str(time)+" "+str(get_roll(accel_xout_scaled,accel_yout_scaled,accel_zout_scaled))+" "+str(get_pitch(accel_xout_scaled,accel_yout_scaled,accel_zout_scaled))
-    # print(result)
     return result.split(" ")
 
 def drawText(x, y, text):                                                
@@ -351,7 +350,7 @@ def connect():
 
 def openfile():
     # TODO: problem with data loading
-    global table, time, x_angle, y_angle, day, month, year, root, embedFrame, recordsFrame, play
+    global table, time, x_angle, y_angle, day, month, year, root, embedFrame, recordsFrame, play, name
 
     name = filedialog.askopenfilename(initialdir=".", title="Select file", filetypes=(("Text File", "*.txt"), ("All Files","*.*")))
     
@@ -370,8 +369,7 @@ def openfile():
             # create data
             model = TableModel()
             # load data
-            data = load_data(name)
-            # print(data) # here it works as a nested dict
+            data = load_data(name, (5, 5, 5))
             # import data ti tablemodel
             model.importDict(data)
         except:
@@ -544,6 +542,9 @@ def handle_arrow_keys(event):
     x_angle = values[2]
     y_angle = values[3]
 
+def submit(*value):
+    load_data(name, value)
+
 def settings():
     """Create Settings window"""
     root = tk.Tk()
@@ -551,14 +552,17 @@ def settings():
     root.geometry("400x100")
     root.resizable(0, 0)  # Don't allow resizing in the x or y direction
 
-    v = StringVar(root, "1")
+    v1 = StringVar(root, "1")
+    v2 = StringVar(root, "1")
+    v3 = StringVar(root, "1")
+
     values = {"5": 5, "10": 10, "15": 15, "20": 20, "50": 50}
 
     roll_entry = Label(root, text="ROLL")
     roll_entry.grid(column=0, row=0)
     col = 0
     for (name, value) in values.items():
-        radio = Radiobutton(root, text=name, variable=v, value=value)
+        radio = Radiobutton(root, text=name, variable=v1, value=value)
         radio.grid(column=1+col, row=0, sticky=tk.W)
         col += 1
 
@@ -566,7 +570,7 @@ def settings():
     pitch_entry.grid(column=0, row=2)
     col = 0
     for (name, value) in values.items():
-        radio = Radiobutton(root, text=name, variable=v, value=value)
+        radio = Radiobutton(root, text=name, variable=v2, value=value)
         radio.grid(column=1+col, row=2, sticky=tk.W)
         col += 1
 
@@ -574,11 +578,11 @@ def settings():
     rollpitch_entry.grid(column=0, row=4)
     col = 0
     for (name, value) in values.items():
-        radio = Radiobutton(root, text=name, variable=v, value=value)
+        radio = Radiobutton(root, text=name, variable=v3, value=value)
         radio.grid(column=1+col, row=4, sticky=tk.W)
         col += 1
 
-    submit_btn = Button(root, text="Submit", width=5)
+    submit_btn = Button(root, text="Submit", width=5, command=lambda: submit(int(v1.get()), int(v2.get()), int(v3.get())))
     submit_btn.grid(row=2, column=7)
 
     mainloop()
