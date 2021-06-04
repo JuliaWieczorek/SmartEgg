@@ -19,6 +19,7 @@ import subprocess
 import urllib
 
 from egg import Egg
+import datetime
 
 SCREEN_SIZE = (700, 600)
 FULLSCREEN_SIZE = (1100, 650)
@@ -100,10 +101,16 @@ def get_roll_pitch_motion():
     """Function calculate movement in vector of roll and pitch"""
     pass
 
-def get_motion():
-    """Function calculate movement"""
-    # here will be if statement
-    pass
+def stat_movement_on_hour(data):
+    total = 0
+    for i in data:
+        if data[i]['roll motion'] > 0:
+            total += 1
+    # print(data)
+    hour1 = date[0]
+    hour2 = date[-1]
+    print(hour2 - hour1)
+    print(total)
 
 def init_opengl():
     glEnable(GL_DEPTH_TEST)
@@ -132,18 +139,22 @@ def init_opengl():
     glEnable(GL_NORMALIZE)
 
 def load_data(filename, *value):
-    global day, month, year
+    global day, month, year, date
     print('settings: ', value)
+    data = dict()  # empty dict
 
     with open(filename, 'rb') as csvfile:
         reader = csv.reader(csvfile, delimiter=',')
-        data = dict()  # empty dict
         pivot_roll = 0
         pivot_pitch = 0
         i = 0
+        date = []
         for row in reader:
             # get values from file
             time    = day+"-"+month+"-"+year+" "+row[0]
+            clock_time = row[0].split(':') # hour
+            date_ = datetime.datetime(int(year), int(month), int(day), int(clock_time[0]), int(clock_time[1]), int(clock_time[2]))
+            date.append(date_)
             x       = float(row[1])
             y       = float(row[2])
             z       = float(row[3])
@@ -165,7 +176,7 @@ def load_data(filename, *value):
     print('17 roll motion: ', data[17]['roll motion'], '17 pitch motion: ', data[17]['pitch motion'])
     print('18 roll motion: ', data[18]['roll motion'], '18 pitch motion: ', data[18]['pitch motion'])
     print('19 roll motion: ', data[19]['roll motion'], '19 pitch motion: ', data[19]['pitch motion'])
-
+    stat_movement_on_hour(data)
     return data
 
 
