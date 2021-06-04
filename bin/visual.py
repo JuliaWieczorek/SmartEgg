@@ -105,8 +105,6 @@ def get_motion():
     # here will be if statement
     pass
 
-
-
 def init_opengl():
     glEnable(GL_DEPTH_TEST)
     glDepthFunc(GL_LESS)
@@ -118,9 +116,9 @@ def init_opengl():
     glEnable(GL_COLOR_MATERIAL)
     glEnable(GL_LIGHTING)
 
-    mat_specular = [ 1.0, 1.0, 1.0, 1.0 ]
-    mat_shininess = [ 50.0 ]
-    light_position = [ -15.0, 10.0, 5.0, 1.0 ]
+    mat_specular = [1.0, 1.0, 1.0, 1.0]
+    mat_shininess = [50.0]
+    light_position = [-15.0, 10.0, 5.0, 1.0]
     glClearColor(0.0, 0.0, 0.0, 0.0)
     glShadeModel(GL_SMOOTH)
 
@@ -135,11 +133,11 @@ def init_opengl():
 
 def load_data(filename, *value):
     global day, month, year
+    print('settings: ', value)
 
-    data = {}
-
-    with open(filename) as csvfile: # it was 'open(filename, 'rb')'
+    with open(filename, 'rb') as csvfile:
         reader = csv.reader(csvfile, delimiter=',')
+        data = dict()  # empty dict
         pivot_roll = 0
         pivot_pitch = 0
         i = 0
@@ -160,11 +158,14 @@ def load_data(filename, *value):
             binary_pitch = get_pitch_motion(i, pitch, pivot_pitch, value[0][1])
             pivot_pitch = pitch
 
-            # TODO: zip() create tuple. I can't update tuple!!!
             # add tuple to a dictionary
             data.update({i: dict(zip(['time', 'x', 'y', 'z', 'roll', 'pitch', 'roll motion', 'pitch motion'], [time, x, y, z, round(roll, 2), round(pitch, 2), binary_roll, binary_pitch]))})
-            # table.redraw()
             i += 1
+
+    print('17 roll motion: ', data[17]['roll motion'], '17 pitch motion: ', data[17]['pitch motion'])
+    print('18 roll motion: ', data[18]['roll motion'], '18 pitch motion: ', data[18]['pitch motion'])
+    print('19 roll motion: ', data[19]['roll motion'], '19 pitch motion: ', data[19]['pitch motion'])
+
     return data
 
 
@@ -352,7 +353,7 @@ def connect():
 
 def openfile():
     # TODO: problem with data loading
-    global table, time, x_angle, y_angle, day, month, year, root, embedFrame, recordsFrame, play, name
+    global table, time, x_angle, y_angle, day, month, year, root, embedFrame, recordsFrame, play, name, table
 
     name = filedialog.askopenfilename(initialdir=".", title="Select file", filetypes=(("Text File", "*.txt"), ("All Files","*.*")))
     
@@ -372,7 +373,7 @@ def openfile():
             model = TableModel()
             # load data
             data = load_data(name, (5, 5, 5))
-            # import data ti tablemodel
+            # import data to tablemodel
             model.importDict(data)
 
         except:
@@ -390,20 +391,23 @@ def openfile():
     embedFrame = tk.Frame(root, width=700, height=600) 
     embedFrame.grid(row=0,column=0)
     # Create embed frame for table
-    recordsFrame = tk.Frame(root, width=450, height=600)
+    recordsFrame = tk.Frame(root, width=600, height=600)
     recordsFrame.grid(row=0,column=1)
     recordsFrame.pack_propagate(0)
     # Create table for records preview
-    table = TableCanvas(recordsFrame,name="tablica", model=model, width=420, height=600, cols=0, rows=0,  cellwidth=50, editable=False, showkeynamesinheader=True, reverseorder=0)
-    table.grid(row=0,sticky=W+N+S)
+    table = TableCanvas(recordsFrame, name="tablica", model=model, width=600, height=600, cols=0, rows=0,  cellwidth=50, editable=False, showkeynamesinheader=True, reverseorder=0)
+    table.grid(row=0, sticky=W+N+S)
     table.createTableFrame()
     # arrange columns width and order
-    model.moveColumn(model.getColumnIndex('time'),1)
-    model.moveColumn(model.getColumnIndex('x'),2)
-    model.moveColumn(model.getColumnIndex('y'),3)
-    model.moveColumn(model.getColumnIndex('z'),4)
-    model.moveColumn(model.getColumnIndex('roll'),5)
-    model.moveColumn(model.getColumnIndex('pitch'),6)
+    model.moveColumn(model.getColumnIndex('time'), 1)
+    model.moveColumn(model.getColumnIndex('x'), 2)
+    model.moveColumn(model.getColumnIndex('y'), 3)
+    model.moveColumn(model.getColumnIndex('z'), 4)
+    model.moveColumn(model.getColumnIndex('roll'), 5)
+    model.moveColumn(model.getColumnIndex('pitch'), 6)
+    model.moveColumn(model.getColumnIndex('roll movement'), 7)
+    model.moveColumn(model.getColumnIndex('pitch movement'),8)
+
     model.columnwidths['time'] = 150
     
     table.redrawTable()
@@ -546,7 +550,20 @@ def handle_arrow_keys(event):
     y_angle = values[3]
 
 def submit(*value):
-    load_data(name, value)
+    print('_____________________________________________________________')
+
+    model = TableModel()
+    # load data
+    data = load_data(name, value)
+    # import data to tablemodel
+    model.importDict(data)
+
+    # Create table for records preview
+    table = TableCanvas(recordsFrame, name="tablica", model=model, width=420, height=600, cols=0, rows=0, cellwidth=50,
+                        editable=False, showkeynamesinheader=True, reverseorder=0)
+    table.grid(row=0, sticky=W + N + S)
+    table.createTableFrame()
+    table.redrawTable()
 
 def settings():
     """Create Settings window"""
@@ -588,7 +605,7 @@ def settings():
     submit_btn = Button(root, text="Submit", width=5, command=lambda: submit(int(v1.get()), int(v2.get()), int(v3.get())))
     submit_btn.grid(row=2, column=7)
 
-    mainloop()
+    root.mainloop()
 
 def run():
     global root
