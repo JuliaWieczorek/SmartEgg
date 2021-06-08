@@ -19,7 +19,7 @@ import subprocess
 import urllib
 
 from egg import Egg
-import datetime
+from datetime import datetime, timedelta
 
 SCREEN_SIZE = (700, 600)
 FULLSCREEN_SIZE = (1100, 650)
@@ -103,14 +103,16 @@ def get_roll_pitch_motion():
 
 def stat_movement_on_hour(data):
     total = 0
+    # how much roll motion was made
+    # TODO: during this time
     for i in data:
         if data[i]['roll motion'] > 0:
             total += 1
-    # print(data)
-    hour1 = date[0]
-    hour2 = date[-1]
-    print(hour2 - hour1)
     print(total)
+    hour1 = date[0]
+    hour2 = hour1 + timedelta(hours=1)
+    print(hour1, hour2)
+
 
 def init_opengl():
     glEnable(GL_DEPTH_TEST)
@@ -153,7 +155,7 @@ def load_data(filename, *value):
             # get values from file
             time    = day+"-"+month+"-"+year+" "+row[0]
             clock_time = row[0].split(':') # hour
-            date_ = datetime.datetime(int(year), int(month), int(day), int(clock_time[0]), int(clock_time[1]), int(clock_time[2]))
+            date_ = datetime(int(year), int(month), int(day), int(clock_time[0]), int(clock_time[1]), int(clock_time[2]))
             date.append(date_)
             x       = float(row[1])
             y       = float(row[2])
@@ -172,10 +174,6 @@ def load_data(filename, *value):
             # add tuple to a dictionary
             data.update({i: dict(zip(['time', 'x', 'y', 'z', 'roll', 'pitch', 'roll motion', 'pitch motion'], [time, x, y, z, round(roll, 2), round(pitch, 2), binary_roll, binary_pitch]))})
             i += 1
-
-    print('17 roll motion: ', data[17]['roll motion'], '17 pitch motion: ', data[17]['pitch motion'])
-    print('18 roll motion: ', data[18]['roll motion'], '18 pitch motion: ', data[18]['pitch motion'])
-    print('19 roll motion: ', data[19]['roll motion'], '19 pitch motion: ', data[19]['pitch motion'])
     stat_movement_on_hour(data)
     return data
 
