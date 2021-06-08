@@ -62,16 +62,20 @@ def resize(width, height):
               0.0, 0.0, 0.0,
               0.0, 1.0, 0.0)
 
-def dist(a,b):
-    return math.sqrt((a*a)+(b*b))
 
-def get_roll(x,y,z):
+def dist(a, b):
+    return math.sqrt((a * a) + (b * b))
+
+
+def get_roll(x, y, z):
     radians = math.atan2(x, y)
     return math.degrees(radians)
 
-def get_pitch(x,y,z):
-    radians = math.atan2((-z) , dist(x,y))
+
+def get_pitch(x, y, z):
+    radians = math.atan2((-z), dist(x, y))
     return math.degrees(radians)
+
 
 def get_roll_motion(i, roll, pivot_roll, value):
     """Function calculate movement in roll"""
@@ -85,6 +89,7 @@ def get_roll_motion(i, roll, pivot_roll, value):
             binary_roll = 0
     return binary_roll
 
+
 def get_pitch_motion(i, pitch, pivot_pitch, value):
     """Function calculate movement in pitch"""
     if i == 0:
@@ -97,21 +102,34 @@ def get_pitch_motion(i, pitch, pivot_pitch, value):
             binary_roll = 0
     return binary_roll
 
+
 def get_roll_pitch_motion():
     """Function calculate movement in vector of roll and pitch"""
     pass
 
+
 def stat_movement_on_hour(data):
     total = 0
-    # how much roll motion was made
-    # TODO: during this time
-    for i in data:
-        if data[i]['roll motion'] > 0:
-            total += 1
-    print(total)
-    hour1 = date[0]
-    hour2 = hour1 + timedelta(hours=1)
-    print(hour1, hour2)
+    l = len(data)
+    print(l)
+    first_item = datetime.strptime(data[0]['time'], '%d-%m-%y %H:%M:%S')
+    last_item = datetime.strptime(data[l - 1]['time'], '%d-%m-%y %H:%M:%S')
+    during = last_item - first_item
+    # TODO: change it! now it bases on number, maybe better can works for hour?
+    i = datetime(0)
+    while i < k:
+        hour_after_1h = first_item + timedelta(hours=1)
+        for j in data:
+            # hour 2 is always greater than hour1
+            if data[j]['roll motion'] > 0:
+                total += 1
+            if first_item == hour_after_1h:
+                print('hh', first_item, hour_after_1h)
+                print(total)
+                break
+        i += 1
+        # hour1 = hour2
+        # hour2 = hour1 + timedelta(hours=1)
 
 
 def init_opengl():
@@ -140,6 +158,7 @@ def init_opengl():
     glEnable(GL_DEPTH_TEST)
     glEnable(GL_NORMALIZE)
 
+
 def load_data(filename, *value):
     global day, month, year, date
     print('settings: ', value)
@@ -150,16 +169,16 @@ def load_data(filename, *value):
         pivot_roll = 0
         pivot_pitch = 0
         i = 0
-        date = []
+        # date = []
         for row in reader:
             # get values from file
-            time    = day+"-"+month+"-"+year+" "+row[0]
-            clock_time = row[0].split(':') # hour
-            date_ = datetime(int(year), int(month), int(day), int(clock_time[0]), int(clock_time[1]), int(clock_time[2]))
-            date.append(date_)
-            x       = float(row[1])
-            y       = float(row[2])
-            z       = float(row[3])
+            time = day + "-" + month + "-" + year + " " + row[0]
+            # clock_time = row[0].split(':') # hour
+            # date_ = datetime(int(year), int(month), int(day), int(clock_time[0]), int(clock_time[1]), int(clock_time[2]))
+            # date.append(date_)
+            x = float(row[1])
+            y = float(row[2])
+            z = float(row[3])
 
             # create new values
             roll = get_roll(x, y, z)
@@ -172,7 +191,8 @@ def load_data(filename, *value):
             pivot_pitch = pitch
 
             # add tuple to a dictionary
-            data.update({i: dict(zip(['time', 'x', 'y', 'z', 'roll', 'pitch', 'roll motion', 'pitch motion'], [time, x, y, z, round(roll, 2), round(pitch, 2), binary_roll, binary_pitch]))})
+            data.update({i: dict(zip(['time', 'x', 'y', 'z', 'roll', 'pitch', 'roll motion', 'pitch motion'],
+                                     [time, x, y, z, round(roll, 2), round(pitch, 2), binary_roll, binary_pitch]))})
             i += 1
     stat_movement_on_hour(data)
     return data
@@ -180,51 +200,55 @@ def load_data(filename, *value):
 
 # TODO: statistics move/hour and column with movement
 
-def get_record(index):  
+def get_record(index):
     record = table.model.getRecordAtRow(index)
 
-    time              = record.get('time')
+    time = record.get('time')
     accel_xout_scaled = float(record.get('x'))
     accel_yout_scaled = float(record.get('y'))
     accel_zout_scaled = float(record.get('z'))
 
-    result = str(time)+" "+str(get_roll(accel_xout_scaled,accel_yout_scaled,accel_zout_scaled))+" "+str(get_pitch(accel_xout_scaled,accel_yout_scaled,accel_zout_scaled))
+    result = str(time) + " " + str(get_roll(accel_xout_scaled, accel_yout_scaled, accel_zout_scaled)) + " " + str(
+        get_pitch(accel_xout_scaled, accel_yout_scaled, accel_zout_scaled))
     return result.split(" ")
 
-def drawText(x, y, text):                                                
-    position = (x, y, -3)                                                       
-    font = pygame.font.Font(None, 30)                                          
-    textSurface = font.render(text, True, (255,255,255,255),(0,0,0,255))                                     
-    textData = pygame.image.tostring(textSurface, "RGBA", True)                
-    glRasterPos3d(*position)                                                
-    glDrawPixels(textSurface.get_width(), textSurface.get_height(),         
-                    GL_RGBA, GL_UNSIGNED_BYTE, textData)
 
-def drawText3D(x, y, z, text):                                                
-    position = (x, y, z)                                                       
-    font = pygame.font.Font(None, 30)                                          
-    textSurface = font.render(text, True, (255,255,255,255),(0,0,0,255))                                     
-    textData = pygame.image.tostring(textSurface, "RGBA", True)                
-    glRasterPos3d(*position)                                                
-    glDrawPixels(textSurface.get_width(), textSurface.get_height(),         
-                    GL_RGBA, GL_UNSIGNED_BYTE, textData)
+def drawText(x, y, text):
+    position = (x, y, -3)
+    font = pygame.font.Font(None, 30)
+    textSurface = font.render(text, True, (255, 255, 255, 255), (0, 0, 0, 255))
+    textData = pygame.image.tostring(textSurface, "RGBA", True)
+    glRasterPos3d(*position)
+    glDrawPixels(textSurface.get_width(), textSurface.get_height(),
+                 GL_RGBA, GL_UNSIGNED_BYTE, textData)
+
+
+def drawText3D(x, y, z, text):
+    position = (x, y, z)
+    font = pygame.font.Font(None, 30)
+    textSurface = font.render(text, True, (255, 255, 255, 255), (0, 0, 0, 255))
+    textData = pygame.image.tostring(textSurface, "RGBA", True)
+    glRasterPos3d(*position)
+    glDrawPixels(textSurface.get_width(), textSurface.get_height(),
+                 GL_RGBA, GL_UNSIGNED_BYTE, textData)
+
 
 def drawXYZCoordinate():
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
 
-    glColor((1.,1.,1.))
+    glColor((1., 1., 1.))
     glLineWidth(1)
     glBegin(GL_LINES)
 
     # draw coordinate system (x, y, z)
     for x in range(-20, 22, 2):
-        glVertex3f(x/10.,-1,-2)
-        glVertex3f(x/10.,-1,2)
-    
+        glVertex3f(x / 10., -1, -2)
+        glVertex3f(x / 10., -1, 2)
+
     for z in range(-20, 22, 2):
-        glVertex3f(-2, -1, z/10.)
-        glVertex3f( 2, -1, z/10.)
-        
+        glVertex3f(-2, -1, z / 10.)
+        glVertex3f(2, -1, z / 10.)
+
     glEnd()
 
     # draw xyz axis
@@ -265,20 +289,23 @@ def drawXYZCoordinate():
     glVertex3f(-2.22, -1.0, -2.1);
     glVertex3f(-2.22, -1.0, -2.1);
     glVertex3f(-2.2, -1.0, -2.0);
-        
+
     glEnd()
 
+
 def read_values():
-    link = "http://localhost:8080" # TODO 5: Change this address to your settings
+    link = "http://localhost:8080"  # TODO 5: Change this address to your settings
     f = urllib.urlopen(link)
     myfile = f.read()
     return myfile.split(" ")
-    
+
+
 # TODO stream mode + BLUETOOTH  - http://blog.bitify.co.uk/2013/11/3d-opengl-visualisation-of-data-from.html
 def connect():
     global table, x_angle, y_angle, root, embedFrame, play
-    
-    server = filedialog.askopenfilename(initialdir = ".",title = "Select server", filetypes =(("Python files", "*.py"),("All Files","*.*")))
+
+    server = filedialog.askopenfilename(initialdir=".", title="Select server",
+                                        filetypes=(("Python files", "*.py"), ("All Files", "*.*")))
 
     print(server)
     if server == "":
@@ -287,35 +314,35 @@ def connect():
     else:
         try:
             path = server.split('/')
-            serverfilename = path[len(path)-1]
+            serverfilename = path[len(path) - 1]
 
-            cmd = 'python '+server
+            cmd = 'python ' + server
 
-            p = subprocess.Popen(cmd, shell=False) #p = subprocess.Popen(cmd, stdout=subprocess.PIPE, shell=True)
-            #out, err = p.communicate() 
-            #result = out.split('\n')
-            #for lin in result:
+            p = subprocess.Popen(cmd, shell=False)  # p = subprocess.Popen(cmd, stdout=subprocess.PIPE, shell=True)
+            # out, err = p.communicate()
+            # result = out.split('\n')
+            # for lin in result:
             #    if not lin.startswith('#'):
             #        print(lin)
             # TODO 4: improve process control: https://stackoverflow.com/questions/3781851/run-a-python-script-from-another-python-script-passing-in-args
             # Show Confirmation if the connection was set up correctly
         except:
-            tk.messagebox.showerror("Error","Server failed!")
+            tk.messagebox.showerror("Error", "Server failed!")
             return
 
     # TODO 3: Check if another process is not open and if is close it before staretin gthe new one.
-    
+
     # If another file is open already then close it
-    if table != None :
+    if table != None:
         closefile()
-    
+
     # Change App title to include currently open file
-    root.title('Smart Egg 3D Visualisation - '+serverfilename)
+    root.title('Smart Egg 3D Visualisation - ' + serverfilename)
 
     # Create embed frame for pygame window
-    embedFrame = tk.Frame(root, width=1100, height=650) 
-    embedFrame.grid(row=0,column=0)
-    
+    embedFrame = tk.Frame(root, width=1100, height=650)
+    embedFrame.grid(row=0, column=0)
+
     # Initiate and embed pygame
     os.environ['SDL_WINDOWID'] = str(embedFrame.winfo_id())
     screen = pygame.display.set_mode(SCREEN_SIZE, HWSURFACE | OPENGL | DOUBLEBUF)
@@ -326,7 +353,7 @@ def connect():
     # Initiate OpenGL
     init_opengl()
 
-    #clock = pygame.time.Clock()
+    # clock = pygame.time.Clock()
 
     # Create OpenGL object
     egg = Egg((0.7, 0.0, 0.0), (1, .95, .8))
@@ -337,18 +364,18 @@ def connect():
     play = True
 
     while play:
-        #then = pygame.time.get_ticks()
-        
+        # then = pygame.time.get_ticks()
+
         values = read_values()
         x_angle = values[1]
         y_angle = values[2]
-        
+
         drawXYZCoordinate()
         # Draw XYZ axis labels
         drawText3D(-1.2, -1.0, -2.4, 'x')
         drawText3D(-2.2, -0.6, -2.4, 'y')
         drawText3D(-2.2, -1.0, -2.0, 'z')
-        
+
         glPushMatrix()
         # rotate object
         glRotate(float(x_angle), 0, 0, 1)
@@ -358,14 +385,16 @@ def connect():
         glPopMatrix()
         # refresh screen    
         pygame.display.flip()
-        #root.update() 
+        # root.update()
+
 
 def openfile():
     # TODO: problem with data loading
     global table, time, x_angle, y_angle, day, month, year, root, embedFrame, recordsFrame, play, name, table
 
-    name = filedialog.askopenfilename(initialdir=".", title="Select file", filetypes=(("Text File", "*.txt"), ("All Files","*.*")))
-    
+    name = filedialog.askopenfilename(initialdir=".", title="Select file",
+                                      filetypes=(("Text File", "*.txt"), ("All Files", "*.*")))
+
     if name == "":
         # if file openning was cancelled then return
         return
@@ -373,7 +402,7 @@ def openfile():
         try:
             path = name.split("/")
             # get date from file name
-            filename = path[len(path)-1]
+            filename = path[len(path) - 1]
             day = filename[6:8]
             month = filename[4:6]
             year = filename[2:4]
@@ -390,22 +419,23 @@ def openfile():
             return
 
     # If another file is open already then close it
-    if table != None :
+    if table != None:
         closefile()
-    
+
     # Change App title to include currently open file
-    root.title('Smart Egg 3D Visualisation ver.1.1 - '+filename)
+    root.title('Smart Egg 3D Visualisation ver.1.1 - ' + filename)
 
     # Create embed frame for pygame window
-    embedFrame = tk.Frame(root, width=700, height=600) 
-    embedFrame.grid(row=0,column=0)
+    embedFrame = tk.Frame(root, width=700, height=600)
+    embedFrame.grid(row=0, column=0)
     # Create embed frame for table
     recordsFrame = tk.Frame(root, width=600, height=600)
-    recordsFrame.grid(row=0,column=1)
+    recordsFrame.grid(row=0, column=1)
     recordsFrame.pack_propagate(0)
     # Create table for records preview
-    table = TableCanvas(recordsFrame, name="tablica", model=model, width=600, height=600, cols=0, rows=0,  cellwidth=50, editable=False, showkeynamesinheader=True, reverseorder=0)
-    table.grid(row=0, sticky=W+N+S)
+    table = TableCanvas(recordsFrame, name="tablica", model=model, width=600, height=600, cols=0, rows=0, cellwidth=50,
+                        editable=False, showkeynamesinheader=True, reverseorder=0)
+    table.grid(row=0, sticky=W + N + S)
     table.createTableFrame()
     # arrange columns width and order
     model.moveColumn(model.getColumnIndex('time'), 1)
@@ -415,27 +445,27 @@ def openfile():
     model.moveColumn(model.getColumnIndex('roll'), 5)
     model.moveColumn(model.getColumnIndex('pitch'), 6)
     model.moveColumn(model.getColumnIndex('roll movement'), 7)
-    model.moveColumn(model.getColumnIndex('pitch movement'),8)
+    model.moveColumn(model.getColumnIndex('pitch movement'), 8)
 
     model.columnwidths['time'] = 150
-    
+
     table.redrawTable()
-    
+
     # Initiate and embed pygame
     os.environ['SDL_WINDOWID'] = str(embedFrame.winfo_id())
-    #os.environ['SDL_VIDEODRIVER'] = 'windib'
+    # os.environ['SDL_VIDEODRIVER'] = 'windib'
     screen = pygame.display.set_mode(SCREEN_SIZE, HWSURFACE | OPENGL | DOUBLEBUF)
     resize(*SCREEN_SIZE)
     pygame.init()
     pygame.display.init()
 
-    #Bind keys and buttons events
-    root.bind('<ButtonRelease-1>', handle_click)    #click release event
-    root.bind_all("<Up>", handle_arrow_keys)        #press Up key event
-    root.bind_all("<Down>", handle_arrow_keys)      #press Down key event
-    root.bind_all("<Left>", handle_arrow_keys)      #press Left key event
-    root.bind_all("<Right>", handle_arrow_keys)     #press Right key event
-    
+    # Bind keys and buttons events
+    root.bind('<ButtonRelease-1>', handle_click)  # click release event
+    root.bind_all("<Up>", handle_arrow_keys)  # press Up key event
+    root.bind_all("<Down>", handle_arrow_keys)  # press Down key event
+    root.bind_all("<Left>", handle_arrow_keys)  # press Left key event
+    root.bind_all("<Right>", handle_arrow_keys)  # press Right key event
+
     # Initiate OpenGL
     init_opengl()
 
@@ -445,7 +475,7 @@ def openfile():
     # Load first element
     values = get_record(0)
     if values != None:
-        time = values[0]+' '+values[1]
+        time = values[0] + ' ' + values[1]
         x_angle = values[2]
         y_angle = values[3]
 
@@ -464,7 +494,7 @@ def openfile():
         for event in pygame.event.get():
             if event.type == KEYUP:
                 handle_arrow_keys(event.key)
-                
+
         glPushMatrix()
         # rotate object
         glRotate(float(x_angle), 0, 0, 1)
@@ -475,7 +505,8 @@ def openfile():
         drawText(0, 2, time)
         # refresh screen    
         pygame.display.flip()
-        root.update() 
+        root.update()
+
 
 def closefile():
     global time, x_angle, y_angle, day, month, year, table, root, embedFrame, recordsFrame, play
@@ -504,11 +535,13 @@ def closefile():
         return
     root.update()
 
+
 def exitapp():
     closefile()
     root.destroy()
 
-#Click event callback function.    
+
+# Click event callback function.
 def handle_click(event):
     global table, time, x_angle, y_angle
 
@@ -516,21 +549,22 @@ def handle_click(event):
         try:
             index = table.get_row_clicked(event)
             values = get_record(index)
-            time = values[0]+' '+values[1]
+            time = values[0] + ' ' + values[1]
             x_angle = values[2]
             y_angle = values[3]
         except:
             print('Error at click')
 
+
 def handle_arrow_keys(event):
     global table, time, x_angle, y_angle
-    
+
     if isinstance(event, Event):
         if event.keysym == 'Up':
             event = K_UP
         elif event.keysym == 'Down':
             event = K_DOWN
-    
+
     # get visible region for scroll control   event != None and 
     x1, y1, x2, y2 = table.getVisibleRegion()
     startvisiblerow, endvisiblerow = table.getVisibleRows(y1, y2)
@@ -543,20 +577,21 @@ def handle_arrow_keys(event):
             table.tablerowheader.yview_scroll(-1, UNITS)
             table.redrawVisible()
     if event == K_DOWN:
-        if table.getSelectedRow() < table.model.getRowCount()-1:
+        if table.getSelectedRow() < table.model.getRowCount() - 1:
             table.gotonextRow()
         # check if move scroll down is needed
         if (endvisiblerow - table.getSelectedRow()) < 3:
             table.yview_scroll(1, UNITS)
             table.tablerowheader.yview_scroll(1, UNITS)
             table.redrawVisible()
-            
+
     # display move on the pygame
     index = table.getSelectedRow()
     values = get_record(index)
-    time = values[0]+' '+values[1]
+    time = values[0] + ' ' + values[1]
     x_angle = values[2]
     y_angle = values[3]
+
 
 def submit(*value):
     print('_____________________________________________________________')
@@ -573,6 +608,7 @@ def submit(*value):
     table.grid(row=0, sticky=W + N + S)
     table.createTableFrame()
     table.redrawTable()
+
 
 def settings():
     """Create Settings window"""
@@ -592,7 +628,7 @@ def settings():
     col = 0
     for (name, value) in values.items():
         radio = Radiobutton(root, text=name, variable=v1, value=value)
-        radio.grid(column=1+col, row=0, sticky=tk.W)
+        radio.grid(column=1 + col, row=0, sticky=tk.W)
         col += 1
 
     pitch_entry = Label(root, text="PITCH")
@@ -600,7 +636,7 @@ def settings():
     col = 0
     for (name, value) in values.items():
         radio = Radiobutton(root, text=name, variable=v2, value=value)
-        radio.grid(column=1+col, row=2, sticky=tk.W)
+        radio.grid(column=1 + col, row=2, sticky=tk.W)
         col += 1
 
     rollpitch_entry = Label(root, text="ROLL AND PITCH")
@@ -608,22 +644,24 @@ def settings():
     col = 0
     for (name, value) in values.items():
         radio = Radiobutton(root, text=name, variable=v3, value=value)
-        radio.grid(column=1+col, row=4, sticky=tk.W)
+        radio.grid(column=1 + col, row=4, sticky=tk.W)
         col += 1
 
-    submit_btn = Button(root, text="Submit", width=5, command=lambda: submit(int(v1.get()), int(v2.get()), int(v3.get())))
+    submit_btn = Button(root, text="Submit", width=5,
+                        command=lambda: submit(int(v1.get()), int(v2.get()), int(v3.get())))
     submit_btn.grid(row=2, column=7)
 
     root.mainloop()
 
+
 def run():
     global root
-    
+
     # tk init
     root = tk.Tk()
     root.title('Smart Egg 3D Visualisation')
-    root.geometry("1200x650")    #Set the size of the app to be 800x600
-    root.resizable(0, 0)        #Don't allow resizing in the x or y direction
+    root.geometry("1200x650")  # Set the size of the app to be 800x600
+    root.resizable(0, 0)  # Don't allow resizing in the x or y direction
 
     # Initializa Menubar
     menubar = Menu(root)
@@ -641,8 +679,9 @@ def run():
     menubar.add_cascade(label="Settings", menu=settingsmenu)
     root.config(menu=menubar)
 
-    #Enter mainlopp
+    # Enter mainlopp
     root.mainloop()
-    
+
+
 if __name__ == "__main__":
     run()
