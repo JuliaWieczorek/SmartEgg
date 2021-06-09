@@ -112,22 +112,49 @@ def stat_movement_on_hour(data):
     total = 0
     l = len(data)
     print(l)
-    first_item = datetime.strptime(data[0]['time'], '%d-%m-%y %H:%M:%S')
-    last_item = datetime.strptime(data[l - 1]['time'], '%d-%m-%y %H:%M:%S')
-    during = last_item - first_item
-    # TODO: change it! now it bases on number, maybe better can works for hour?
-    i = datetime(0)
-    while i < k:
-        hour_after_1h = first_item + timedelta(hours=1)
+    first_hour = datetime.strptime(data[0]['time'], '%d-%m-%y %H:%M:%S')
+    last_hour = datetime.strptime(data[l - 1]['time'], '%d-%m-%y %H:%M:%S')
+    after_1_hour = first_hour + timedelta(hours=1)
+    during = last_hour - first_hour
+    if during == timedelta(hours=1):
         for j in data:
-            # hour 2 is always greater than hour1
             if data[j]['roll motion'] > 0:
                 total += 1
-            if first_item == hour_after_1h:
-                print('hh', first_item, hour_after_1h)
-                print(total)
-                break
-        i += 1
+    elif during > timedelta(hours=1):
+        n_during = during.seconds
+        after_1_hour = first_hour + timedelta(hours=1)
+        for item in data:
+            item = datetime.strptime(data[item]['time'], '%d-%m-%y %H:%M:%S')
+            n_hour = []
+            n_hour.append(after_1_hour)
+            after_x_hour = after_x_hour
+            if item >= after_1_hour:
+                after_x_hour = item
+                n_hour.append(after_x_hour)
+
+                continue
+        i = timedelta(hours=0)
+        list_of_total = []
+        while i > n_during:
+            for j in data: # for j in data after 1 hour
+                if data[j]['roll motion'] > 0:
+                    total += 1
+                list_of_total.append(total)
+            # change after_1_hour and first_hour
+    else:
+        print('Measurement length less than 1 hour.')
+    # while i < k:
+    #     after_1h = first_hour + timedelta(hours=1)
+    #     for j in data:
+    #         # hour 2 is always greater than hour1
+    #         if data[j]['roll motion'] > 0:
+    #             total += 1
+    #         if first_hour == after_1h:
+    #             print('hh', first_hour, after_1h)
+    #             print(total)
+    #             break
+    #     i += timedelta(hours=1)
+    # print('i:', i)
         # hour1 = hour2
         # hour2 = hour1 + timedelta(hours=1)
 
