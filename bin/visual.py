@@ -109,9 +109,9 @@ def get_roll_pitch_motion():
 
 
 def stat_movement_on_hour(data):
+    # check on another file
     total = 0
     l = len(data)
-    print(l)
     first_hour = datetime.strptime(data[0]['time'], '%d-%m-%y %H:%M:%S')
     last_hour = datetime.strptime(data[l - 1]['time'], '%d-%m-%y %H:%M:%S')
     after_1_hour = first_hour + timedelta(hours=1)
@@ -142,41 +142,15 @@ def stat_movement_on_hour(data):
                         data_i = datetime.strptime(data[i]['time'], '%d-%m-%y %H:%M:%S')
                         if data_i == item:
                             if data[i]['roll motion'] > 0:
-                                print('tu', data[i]['roll motion'])
                                 total += 1
-                                print(total)
-                            list_of_total.append(total)
-                        print(list_of_total)
+                    list_of_total.append(total)
                     item += timedelta(hours=1)
             i += 1
-            print('10')
             print(list_of_total)
-
-        # i = timedelta(hours=0)
-        # while i > n_during:  # have no sense? change it to while i>item? or both?
-        #     for j in data: # for j in data after 1 hour
-        #         if data[j]['roll motion'] > 0:
-        #             total += 1
-        #         list_of_total.append(total)
-        # mean_total = sum(list_of_total)/len(list_of_total)
-        # return mean_total
-            # change after_1_hour and first_hour
+            mean_total = sum(list_of_total) / len(list_of_total)
+            return mean_total
     else:
         print('Measurement length less than 1 hour.')
-    # while i < k:
-    #     after_1h = first_hour + timedelta(hours=1)
-    #     for j in data:
-    #         # hour 2 is always greater than hour1
-    #         if data[j]['roll motion'] > 0:
-    #             total += 1
-    #         if first_hour == after_1h:
-    #             print('hh', first_hour, after_1h)
-    #             print(total)
-    #             break
-    #     i += timedelta(hours=1)
-    # print('i:', i)
-        # hour1 = hour2
-        # hour2 = hour1 + timedelta(hours=1)
 
 
 def init_opengl():
