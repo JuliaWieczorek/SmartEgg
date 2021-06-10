@@ -120,26 +120,46 @@ def stat_movement_on_hour(data):
         for j in data:
             if data[j]['roll motion'] > 0:
                 total += 1
+        return total
     elif during > timedelta(hours=1):
         n_during = during.seconds
         after_1_hour = first_hour + timedelta(hours=1)
+        # create a list of "stoping hours"
         for item in data:
             item = datetime.strptime(data[item]['time'], '%d-%m-%y %H:%M:%S')
-            n_hour = []
-            n_hour.append(after_1_hour)
-            after_x_hour = after_x_hour
+            list_of_hour = []
             if item >= after_1_hour:
-                after_x_hour = item
-                n_hour.append(after_x_hour)
-
-                continue
-        i = timedelta(hours=0)
+                list_of_hour.append(item)
+                after_1_hour = item
+        # calculate total ?
         list_of_total = []
-        while i > n_during:
-            for j in data: # for j in data after 1 hour
-                if data[j]['roll motion'] > 0:
-                    total += 1
-                list_of_total.append(total)
+        i = 0
+        while i < len(list_of_hour):
+            for item in data:
+                item = datetime.strptime(data[item]['time'], '%d-%m-%y %H:%M:%S')
+                while item <= list_of_hour[i]:
+                    for i in data:
+                        data_i = datetime.strptime(data[i]['time'], '%d-%m-%y %H:%M:%S')
+                        if data_i == item:
+                            if data[i]['roll motion'] > 0:
+                                print('tu', data[i]['roll motion'])
+                                total += 1
+                                print(total)
+                            list_of_total.append(total)
+                        print(list_of_total)
+                    item += timedelta(hours=1)
+            i += 1
+            print('10')
+            print(list_of_total)
+
+        # i = timedelta(hours=0)
+        # while i > n_during:  # have no sense? change it to while i>item? or both?
+        #     for j in data: # for j in data after 1 hour
+        #         if data[j]['roll motion'] > 0:
+        #             total += 1
+        #         list_of_total.append(total)
+        # mean_total = sum(list_of_total)/len(list_of_total)
+        # return mean_total
             # change after_1_hour and first_hour
     else:
         print('Measurement length less than 1 hour.')
