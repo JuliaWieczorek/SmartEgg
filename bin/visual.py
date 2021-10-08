@@ -103,16 +103,18 @@ def get_pitch_motion(i, pitch, pivot_pitch, value):
     return binary_roll
 
 
-def get_roll_pitch_motion():
-    """Function calculate movement in vector of roll and pitch"""
-    pass
-
+def get_roll_pitch_motion(roll, pitch):
+    """Function calculate movement in vector(?) of roll and pitch"""
+    if roll == 1 and pitch == 1:
+        roll_pitch_motion = 1
+    else:
+        roll_pitch_motion = 0
+    return roll_pitch_motion
 
 def stat_movement_on_hour(data):
     # check on another file
     total = 0
     l = len(data)
-    print(l)
     first_hour = datetime.strptime(data[0]['time'], '%d-%m-%y %H:%M:%S')
     last_hour = datetime.strptime(data[l - 1]['time'], '%d-%m-%y %H:%M:%S')
     after_1_hour = first_hour + timedelta(hours=1)
@@ -132,25 +134,31 @@ def stat_movement_on_hour(data):
             if item >= after_1_hour:
                 list_of_hour.append(item)
                 after_1_hour = item
-        # calculate total ?
         list_of_total = []
         i = 0
         while i < len(list_of_hour):
+            print('while1', i, list_of_hour)
             for item in data:
-                item = datetime.strptime(data[item]['time'], '%d-%m-%y %H:%M:%S')
-                while item <= list_of_hour[i]:
+                print('**--**')
+                print('item', item)
+                # problem with item1
+                item1 = datetime.strptime(data[i]['time'], '%d-%m-%y %H:%M:%S')
+                while item1 <= list_of_hour[i]:
+                    print('while2', item1, list_of_hour[i])
                     for j in data:
-                        data_i = datetime.strptime(data[i]['time'], '%d-%m-%y %H:%M:%S')
-                        if data_i == item:
+                        data_i = datetime.strptime(data[j]['time'], '%d-%m-%y %H:%M:%S')
+                        if data_i == item1:
                             if data[j]['roll motion'] > 0:
                                 total += 1
-                                print(total)
-                    # list_of_total.append(total)
+                                # print(total)
+                    list_of_total.append(total)
                     # print(list_of_total)
-                    item += timedelta(hours=1)
+                    item1 += timedelta(hours=1)
+                    print(item1)
             i += 1
-            print('10')
-            print(list_of_total)
+            # print('tu 10')
+        # print(list_of_total)
+        # mean_total = sum(list_of_total) / len(list_of_total)
 
         # i = timedelta(hours=0)
         # while i > n_during:  # have no sense? change it to while i>item? or both?
@@ -237,15 +245,16 @@ def load_data(filename, *value):
             binary_pitch = get_pitch_motion(i, pitch, pivot_pitch, value[0][1])
             pivot_pitch = pitch
 
+            binary_roll_pitch = get_roll_pitch_motion(binary_roll, binary_pitch)
+
             # add tuple to a dictionary
-            data.update({i: dict(zip(['time', 'x', 'y', 'z', 'roll', 'pitch', 'roll motion', 'pitch motion'],
-                                     [time, x, y, z, round(roll, 2), round(pitch, 2), binary_roll, binary_pitch]))})
+            data.update({i: dict(zip(['time', 'x', 'y', 'z', 'roll', 'pitch', 'roll motion', 'pitch motion', 'roll and pitch motion'],
+                                     [time, x, y, z, round(roll, 2), round(pitch, 2), binary_roll, binary_pitch, binary_roll_pitch]))})
             i += 1
     stat_movement_on_hour(data)
     return data
 
-
-# TODO: statistics move/hour and column with movement
+# TODO: statistics move/hour
 
 def get_record(index):
     record = table.model.getRecordAtRow(index)
@@ -480,7 +489,7 @@ def openfile():
     recordsFrame.grid(row=0, column=1)
     recordsFrame.pack_propagate(0)
     # Create table for records preview
-    table = TableCanvas(recordsFrame, name="tablica", model=model, width=600, height=600, cols=0, rows=0, cellwidth=50,
+    table = TableCanvas(recordsFrame, name="tablica", model=model, width=800, height=600, cols=0, rows=0, cellwidth=50,
                         editable=False, showkeynamesinheader=True, reverseorder=0)
     table.grid(row=0, sticky=W + N + S)
     table.createTableFrame()
@@ -493,6 +502,8 @@ def openfile():
     model.moveColumn(model.getColumnIndex('pitch'), 6)
     model.moveColumn(model.getColumnIndex('roll movement'), 7)
     model.moveColumn(model.getColumnIndex('pitch movement'), 8)
+    model.moveColumn(model.getColumnIndex('roll and pitch movement'), 9)
+
 
     model.columnwidths['time'] = 150
 
