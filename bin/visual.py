@@ -102,6 +102,17 @@ def get_pitch_motion(i, pitch, pivot_pitch, value):
             binary_roll = 0
     return binary_roll
 
+def get_pitch_motion(i, pitch, pivot_pitch, value):
+    """Function calculate movement in pitch"""
+    # which one is better?
+    if i == 0:
+        return 0
+    else:
+        roll_move = pitch - pivot_pitch
+        if roll_move > value:
+            return 1
+        else:
+            return 0
 
 def get_roll_pitch_motion(roll, pitch):
     """Function calculate movement in vector(?) of roll and pitch"""
@@ -110,6 +121,11 @@ def get_roll_pitch_motion(roll, pitch):
     else:
         roll_pitch_motion = 0
     return roll_pitch_motion
+
+def get_roll_pitch_motion(roll, pitch):
+    """Function calculate movement in vector(?) of roll and pitch"""
+    # shorter version - check if valid
+    return 1 if roll == 1 and pitch == 1 else 0
 
 def stat_movement_on_hour(data):
     # check on another file
