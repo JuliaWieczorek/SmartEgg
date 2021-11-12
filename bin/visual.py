@@ -116,81 +116,24 @@ def get_roll_pitch_motion(roll, pitch):
     # shorter version - check if valid
     return 1 if roll == 1 and pitch == 1 else 0
 
+def days_hours_minutes(td):
+    return td.days, td.seconds//3600, (td.seconds//60)%60
+
 def stat_movement_on_hour(data):
-    # check on another file
     total = 0
     l = len(data)
     first_hour = datetime.strptime(data[0]['time'], '%d-%m-%y %H:%M:%S')
     last_hour = datetime.strptime(data[l - 1]['time'], '%d-%m-%y %H:%M:%S')
-    after_1_hour = first_hour + timedelta(hours=1)
     during = last_hour - first_hour
-    if during == timedelta(hours=1):
-        for j in data:
-            if data[j]['roll motion'] > 0:
-                total += 1
-        return total
-    elif during > timedelta(hours=1):
-        n_during = during.seconds
-        after_1_hour = first_hour + timedelta(hours=1)
-        # create a list of "stoping hours"
-        for item in data:
-            item = datetime.strptime(data[item]['time'], '%d-%m-%y %H:%M:%S')
-            list_of_hour = []
-            if item >= after_1_hour:
-                list_of_hour.append(item)
-                after_1_hour = item
-        list_of_total = []
-        i = 0
-        while i < len(list_of_hour):
-            print('while1', i, list_of_hour)
-            for item in data:
-                print('**--**')
-                print('item', item)
-                # problem with item1
-                item1 = datetime.strptime(data[i]['time'], '%d-%m-%y %H:%M:%S')
-                while item1 <= list_of_hour[i]:
-                    print('while2', item1, list_of_hour[i])
-                    for j in data:
-                        data_i = datetime.strptime(data[j]['time'], '%d-%m-%y %H:%M:%S')
-                        if data_i == item1:
-                            if data[j]['roll motion'] > 0:
-                                total += 1
-                                # print(total)
-                    list_of_total.append(total)
-                    # print(list_of_total)
-                    item1 += timedelta(hours=1)
-                    print(item1)
-            i += 1
-            # print('tu 10')
-        # print(list_of_total)
-        # mean_total = sum(list_of_total) / len(list_of_total)
-
-        # i = timedelta(hours=0)
-        # while i > n_during:  # have no sense? change it to while i>item? or both?
-        #     for j in data: # for j in data after 1 hour
-        #         if data[j]['roll motion'] > 0:
-        #             total += 1
-        #         list_of_total.append(total)
-        # mean_total = sum(list_of_total)/len(list_of_total)
-        # return mean_total
-            # change after_1_hour and first_hour
-    else:
-        print('Measurement length less than 1 hour.')
-    # while i < k:
-    #     after_1h = first_hour + timedelta(hours=1)
-    #     for j in data:
-    #         # hour 2 is always greater than hour1
-    #         if data[j]['roll motion'] > 0:
-    #             total += 1
-    #         if first_hour == after_1h:
-    #             print('hh', first_hour, after_1h)
-    #             print(total)
-    #             break
-    #     i += timedelta(hours=1)
-    # print('i:', i)
-        # hour1 = hour2
-        # hour2 = hour1 + timedelta(hours=1)
-
+    during = days_hours_minutes(during)
+    for j in data:
+        if data[j]['roll motion'] > 0:
+            total += 1
+    if during[1] == 1:
+        statement = "There was {movement} movement in one hour and {minutes} minutes.".format(movement=total, minutes=during[2])
+    elif during[1] > 1:
+        statement = "There were {movement} movement in {hour} hours and {minutes} minutes.".format(movement=total, hour=during[1], minutes=during[2])
+    return statement
 
 def init_opengl():
     glEnable(GL_DEPTH_TEST)
@@ -256,10 +199,7 @@ def load_data(filename, *value):
             data.update({i: dict(zip(['time', 'x', 'y', 'z', 'roll', 'pitch', 'roll motion', 'pitch motion', 'roll and pitch motion'],
                                      [time, x, y, z, round(roll, 2), round(pitch, 2), binary_roll, binary_pitch, binary_roll_pitch]))})
             i += 1
-    stat_movement_on_hour(data)
     return data
-
-# TODO: statistics move/hour
 
 def get_record(index):
     record = table.model.getRecordAtRow(index)
@@ -497,6 +437,11 @@ def openfile():
     table = TableCanvas(recordsFrame, name="tablica", model=model, width=800, height=600, cols=0, rows=0, cellwidth=50,
                         editable=False, showkeynamesinheader=True, reverseorder=0)
     table.grid(row=0, sticky=W + N + S)
+
+    stat_text = stat_movement_on_hour(data)
+    statLabel = Label(root, text=stat_text)
+    statLabel.grid(column=0, row=1)
+
     table.createTableFrame()
     # arrange columns width and order
     model.moveColumn(model.getColumnIndex('time'), 1)
